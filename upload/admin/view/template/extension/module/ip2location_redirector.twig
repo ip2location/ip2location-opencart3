@@ -1,0 +1,368 @@
+{{ header }}{{ column_left }}
+<div id="content">
+	<div class="page-header">
+		<div class="container-fluid">
+			<div class="pull-right">
+				<a href="{{ cancel }}" data-toggle="tooltip" title="{{ button_cancel }}" class="btn btn-default"><i class="fa fa-reply"></i></a>
+			</div>
+			<h1>{{ heading_title }}</h1>
+			<ul class="breadcrumb">
+				{% for breadcrumb in breadcrumbs %}
+				<li><a href="{{ breadcrumb.href }}">{{ breadcrumb.text }}</a></li>
+				{% endfor %}
+			</ul>
+		</div>
+	</div>
+
+	<div class="container-fluid">
+		{% if error_warning %}
+		<div class="alert alert-danger alert-dismissible">
+			<i class="fa fa-exclamation-circle"></i> {{ error_warning }}
+			<button type="button" class="close" data-dismiss="alert">&times;</button>
+		</div>
+		{% endif %}
+
+		{% if success %}
+		<div class="alert alert-success alert-dismissible">
+			<i class="fa fa-check-circle"></i> {{ success }}
+			<button type="button" class="close" data-dismiss="alert">&times;</button>
+		</div>
+		{% endif %}
+
+		<div class="panel panel-default">
+			<div class="panel-heading">
+				<h3 class="panel-title"><i class="fa fa-pencil"></i> {{ text_status }}</h3>
+			</div>
+			<div class="panel-body">
+				<form class="form-horizontal" method="post" action="{{ action}}">
+					<div class="form-group">
+						<div class="col-sm-2">
+							<select class="form-control" name="module_ip2location_redirector_status">
+								<option value="1"{% if module_ip2location_redirector_status == '1' %} selected{% endif %}>{{ text_enabled }}</option>
+								<option value="0"{% if module_ip2location_redirector_status != '1' %} selected{% endif %}>{{ text_disabled }}</option>
+							</select>
+						</div>
+						<div class="col-sm-10">
+							<div class="text-right">
+								<button title="{{ button_save }}" class="btn btn-success"><i class="fa fa-save"></i> {{ button_save }}</button>
+							</div>
+						</div>
+					</div>
+					
+				</form>
+			</div>
+		</div>
+
+		<div class="panel panel-default">
+			<div class="panel-heading">
+				<h3 id="rules-section" class="panel-title"><i class="fa fa-list"></i> {{ text_rules }}</h3>
+			</div>
+			<div class="panel-body loading-overlay-container">
+				<div class="row">
+					<div class="col-sm-12 text-right">
+						<p>
+							<span data-toggle="modal" data-target="#add-rule-modal">
+							<a data-button="add" data-toggle="tooltip" title="{{ button_add }}" class="btn btn-primary" data-update-url="{{ current_url }}"><i class="fa fa-plus-circle"></i> {{ text_new_rule }}</a>
+							</span>
+						</p>
+					</div>
+				</div>
+
+				{% if rules_success %}
+				<div class="alert alert-success alert-dismissible">
+					<i class="fa fa-check-circle"></i> {{ rules_success }}
+					<button type="button" class="close" data-dismiss="alert">&times;</button>
+				</div>
+				{% endif %}
+			
+				<div class="table-responsive">
+					<table class="table table-bordered table-hover">
+						<thead>
+							<tr>
+								<td class="text-left col-sm-2">{{ column_origin }}</td>
+								<td class="col-sm-3">
+									<a data-load="sort" href="{{ link_sort_from }}"{% if sort == 'from' %} class="{{ order|lower }}"{% endif %}>{{ column_from }}</a>
+								</td>
+								<td class="col-sm-3">
+									<a data-load="sort" href="{{ link_sort_to }}"{% if sort == 'to' %} class="{{ order|lower }}"{% endif %}>{{ column_to }}</a>
+								</td>
+								<td class="col-sm-1">
+									<a data-load="sort" href="{{ link_sort_code }}"{% if sort == 'code' %} class="{{ order|lower }}"{% endif %}>{{ column_code }}</a>
+								</td>
+								<td class="col-sm-1">
+									<a data-load="sort" href="{{ link_sort_status }}"{% if sort == 'status' %} class="{{ order|lower }}"{% endif %}>{{ column_status }}</a>
+								</td>
+								<td class="text-right col-sm-2"></td>
+							</tr>
+						</thead>
+						<tbody>
+							{% if rules	%}
+							{% for rule in rules %}
+							<tr>
+								<td>
+									<span data-preview="origins" data-rule-id="{{ rule.id }}" style="display:block;overflow:auto;max-height:60px">{{ rule.show_origin }}</span>
+									<select class="form-control hidden" data-input="origins" data-rule-id="{{ rule.id }}" multiple data-placeholder="{{ entry_origin }}">
+										{% for origin in origins %}
+										<option value="{{ origin.code }}"{% if origin.code in rule.origins %} selected{% endif %}>{{ origin.text }}</option>
+										{% endfor %}
+									</select>
+								</td>
+								<td>
+									<span data-preview="from" data-rule-id="{{ rule.id }}">
+									{% if rule.condition == '0' %}
+									<span class="label label-success">
+									{% elseif rule.condition == '1' %}
+									<span class="label label-info">
+									{% else %}
+									<span class="label label-danger">
+									{% endif %}
+										
+										{% if rule.condition == '0' %}
+											{{ text_equals_to }}
+										{% elseif rule.condition == '1' %}
+											{{ text_begins_with }}
+										{% else %}
+											{{ text_regular_expression }}
+										{% endif %}
+									</span>
+									<br />
+									{{ rule.show_from }}
+									</span>
+									<div class="row">
+										<div class="col-sm-3" style="margin-right:0;padding-right:0">
+											<select class="form-control hidden" data-input="condition" data-rule-id="{{ rule.id }}">
+												<option value="0"{% if rule.condition == '0' %} selected{% endif %}>{{ text_equals_to }}</option>
+												<option value="1"{% if rule.condition == '1' %} selected{% endif %}>{{ text_begins_with }}</option>
+												<option value="2"{% if rule.condition == '2' %} selected{% endif %}>{{ text_regular_expression }}</option>
+											</select>
+										</div>
+										<div class="col-sm-9" style="margin-left:0;padding-left:2px">
+											<input type="hidden" data-input="from" data-rule-id="{{ rule.id }}" value="{{ rule.from }}" class="form-control" placeholder="{{ entry_from }}">
+										</div>
+									</div>
+								</td>
+								<td>
+									<span data-preview="to" data-rule-id="{{ rule.id }}">{{ rule.show_to }}</span>
+									<input type="hidden" data-input="to" data-rule-id="{{ rule.id }}" value="{{ rule.to }}" class="form-control" placeholder="{{ entry_to }}"{% if rule.code == '404' %} disabled{% endif %} />
+								</td>
+								<td>
+									<span data-preview="code" data-rule-id="{{ rule.id }}">{{ rule.code }}</span>
+									<select class="form-control hidden" data-input="code" data-rule-id="{{ rule.id }}">
+										{% for code in codes %}
+										<option value="{{ code.code }}"{% if code.code == rule.code %} selected{% endif %}>{{ code.text }}</option>
+										{% endfor %}
+									</select>
+								</td>
+								<td>
+									<span data-preview="status" data-rule-id="{{ rule.id }}">
+										{% if rule.status %}
+										{{ text_enabled }}
+										{% else %}
+										{{ text_disabled }}
+										{% endif %}
+									</span>
+									<select class="form-control hidden" data-input="status" data-rule-id="{{ rule.id }}">
+										<option value="1"{% if rule.status %} selected{% endif %}>{{ text_enabled }}</option>
+										<option value="0"{% if rule.status == false %} selected{% endif %}>{{ text_disabled }}</option>
+									</select>
+								</td>
+								<td class="text-right">
+									<a data-button="edit" data-rule-id="{{ rule.id }}" data-toggle="tooltip" title="{{ button_edit }}" class="btn btn-primary"><i class="fa fa-pencil"></i></a>
+									<a data-button="save" data-rule-id="{{ rule.id }}" data-toggle="tooltip" title="{{ button_save }}" class="btn btn-success hidden"><i class="fa fa-save"></i></a>
+									<a data-button="cancel" data-rule-id="{{ rule.id }}" data-toggle="tooltip" title="{{ button_cancel }}" class="btn btn-warning hidden"><i class="fa fa-reply"></i></a>
+									<a data-button="delete" data-rule-id="{{ rule.id }}" data-toggle="tooltip" title="{{ button_delete }}" class="btn btn-danger"><i class="fa fa-trash"></i></a>
+								</td>
+							</tr>
+							{% endfor %}
+							{% else %}
+							<tr>
+								<td class="text-center" colspan="5">{{ text_no_results }}</td>
+							</tr>
+							{% endif %}
+						</tbody>
+					</table>
+				</div>
+				<div class="row">
+					<div class="col-sm-6 text-left">{% if pagination %}{{ pagination }}{% endif %}</div>
+					<div class="col-sm-6 text-right">{% if results %}{{ results }}{% endif %}</div>
+				</div>
+				<div class="loading-overlay hidden" id="loading-overlay">
+					<i class="fa fa-circle-o-notch fa-spin"></i> {{ text_loading }}
+				</div>
+			</div>
+		</div>
+
+		<div class="panel panel-default">
+			<div class="panel-heading">
+				<h3 id="settings-section" class="panel-title"><i class="fa fa-database"></i> {{ text_database }}</h3>
+			</div>
+			<div class="panel-body">
+				{% if settings_error %}
+				<div class="alert alert-danger alert-dismissible">
+					<i class="fa fa-exclamation-circle"></i> {{ settings_error }}
+					<button type="button" class="close" data-dismiss="alert">&times;</button>
+				</div>
+				{% endif %}
+
+				{% if settings_success %}
+				<div class="alert alert-success alert-dismissible">
+					<i class="fa fa-check-circle"></i> {{ settings_success }}
+					<button type="button" class="close" data-dismiss="alert">&times;</button>
+				</div>
+				{% endif %}
+
+				<form class="form-horizontal" method="post" action="{{ action}}" id="database-form">
+					<div class="form-group">
+						<label class="col-sm-2 control-label" for="lookup-method"><span data-toggle="tooltip" title="{{ help_method }}">{{ entry_method }}</span></label>
+						<div class="col-sm-2">
+							<select class="form-control" id="lookup-method" name="method">
+								<option value="0"{% if settings.ip2location_lookup_method == '0' %} selected{% endif %}>{{ text_local_binary_database }}</option>
+								<option value="1"{% if settings.ip2location_lookup_method == '1' %} selected{% endif %}>{{ text_remote_api }}</option>
+							</select>
+						</div>
+					</div>
+					
+					
+					<div id="local-database" class="form-group{% if settings.ip2location_lookup_method == '1' %} hidden{% endif %}">
+						<label class="col-sm-2 control-label" for="database"><span data-toggle="tooltip" title="{{ help_database_location }}">{{ entry_database_location }}</span></label>
+						<div class="col-sm-10">
+							<input type="text" class="form-control" name="database" id="database" value="{{ settings.ip2location_database_location }}" placeholder="{{ entry_database_location }}">
+							<p class="help-block">{{ entry_database_location_description }}</p>
+						</div>
+					</div>
+					
+					<div id="remote-api" class="form-group{% if settings.ip2location_lookup_method == '0' %} hidden{% endif %}">
+						<label class="col-sm-2 control-label" for="api-key"><span data-toggle="tooltip" title="{{ help_api_key }}">{{ entry_api_key }}</span></label>
+						<div class="col-sm-10">
+							<input type="text" class="form-control" name="apiKey" id="api-key" value="{{ settings.ip2location_api_key }}" placeholder="{{ entry_api_key }}">
+							{% if ws_credit == '' %}
+							<p class="help-block">{{ entry_api_key_description }}</p>
+							{% else %}
+							<p class="help-block"><strong>{{ entry_remaining_credit }}</strong> {{ ws_credit }}</p>
+							{% endif %}
+						</div>
+					</div>
+					<div class="text-right">
+						<button title="{{ button_save }}" class="btn btn-success"><i class="fa fa-save"></i> {{ button_save }}</button>
+					</div>
+				</form>
+			</div>
+		</div>
+
+		<div class="panel panel-default">
+			<div class="panel-heading">
+				<h3 id="lookup-section" class="panel-title"><i class="fa fa-location-arrow"></i> {{ text_lookup }}</h3>
+			</div>
+			<div class="panel-body">
+				{% if lookup_error %}
+				<div class="alert alert-danger alert-dismissible">
+					<i class="fa fa-exclamation-circle"></i> {{ lookup_error }}
+				</div>
+				{% endif %}
+
+				{% if lookup_result %}
+				<div class="alert alert-info alert-dismissible">
+					<i class="fa fa-info-circle"></i> {{ lookup_result }}
+				</div>
+				{% endif %}
+
+				<form class="form-horizontal" method="post" action="{{ action}}" id="lookup-form">
+					<div class="form-group">
+						<label class="col-sm-2 control-label" for="ip-address">{{ entry_ip_address }}</label>
+						<div class="col-sm-5">
+							<input type="text" class="form-control" name="ipAddress" id="ip-address" value="{{ ipAddress }}" placeholder="{{ entry_ip_address }}"{% if lookup_enabled == false %} disabled{% endif %}>
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="col-sm-2 control-label"></label>
+						<div class="col-sm-5">
+							<button title="{{ button_lookup }}" class="btn btn-primary{% if lookup_enabled == false %} disabled{% endif %}"><i class="fa fa-search"></i> {{ button_lookup }}</button>
+						</div>
+					</div>
+				</form>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div class="modal fade" tabindex="-1" role="dialog" id="add-rule-modal">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<form class="form-horizontal" method="post" action="{{ action}}" id="add-rule-form">
+				<input type="hidden" name="newRule" value="true">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span></button>
+					<h4 class="modal-title">{{ text_add_rule }}</h4>
+				</div>
+				<div class="modal-body">
+					{% if rules_error %}
+					<div class="alert alert-danger alert-dismissible">
+						<i class="fa fa-exclamation-circle"></i> {{ rules_error }}
+						<button type="button" class="close" data-dismiss="alert">&times;</button>
+					</div>
+					{% endif %}
+					<div class="form-group">
+						<label class="col-sm-2 control-label" for="add-rule-from"><span data-toggle="tooltip" title="{{ help_origin }}">{{ entry_origin }}</span></label>
+						<div class="col-sm-10">
+							<select class="form-control" id="add-origin" name="newOrigins[]" multiple style="width:100%" data-placeholder="{{ entry_origin }}">
+								{% for origin in origins %}
+								<option value="{{ origin.code }}"{% if origin.code in new_origins %} selected{% endif %}>{{ origin.text }}</option>
+								{% endfor %}
+							</select>
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="col-sm-2 control-label" for="add-rule-from"><span data-toggle="tooltip" title="{{ help_from }}">{{ entry_from }}</span></label>
+						<div class="col-sm-3" style="margin-right:0;padding-right:0">
+							<select class="form-control" id="add-from-condition" name="newCondition">
+								<option value="0"{% if new_condition == '0' %} selected{% endif %}>{{ text_equals_to }}</option>
+								<option value="1"{% if new_condition == '1' %} selected{% endif %}>{{ text_begins_with }}</option>
+								<option value="2"{% if new_condition == '2' %} selected{% endif %}>{{ text_regular_expression }}</option>
+							</select>
+						</div>
+						<div class="col-sm-7">
+							<input type="text" class="form-control" name="newFrom" id="add-rule-from" value="{{ new_from }}" placeholder="{{ entry_from }}">
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="col-sm-2 control-label" for="add-rule-to"><span data-toggle="tooltip" title="{{ help_to }}">{{ entry_to }}</span></label>
+						<div class="col-sm-10">
+							<input type="text" class="form-control" name="newTo" id="add-rule-to" value="{{ new_to }}" placeholder="{{ entry_to }}">
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="col-sm-2 control-label" for="add-rule-code"><span data-toggle="tooltip" title="{{ help_code }}">{{ entry_code }}</span></label>
+						<div class="col-sm-10">
+							<select class="form-control" id="add-rule-code" name="newCode">
+								{% for code in codes %}
+								<option value="{{ code.code }}"{% if new_code == code.code %} selected{% endif %}>{{ code.text }}</option>
+								{% endfor %}
+							</select>
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="col-sm-2 control-label" for="add-rule-status">{{ entry_status }}</label>
+						<div class="col-sm-10">
+							<select class="form-control" id="add-rule-status" name="newStatus">
+								<option value="1"{% if new_status == '1' %} selected{% endif %}>{{ text_enabled }}</option>
+								<option value="0"{% if new_status == '0' %} selected{% endif %}>{{ text_disabled }}</option>
+							</select>
+						</div>
+					</div>
+				</div>
+				<div class="modal-footer">
+					<i class="fa fa-circle-o-notch fa-spin add-rule-loading hidden"></i>
+					<button type="button" class="btn btn-warning" data-dismiss="modal">{{ button_cancel }}</button>
+					<button type="submit" class="btn btn-primary">{{ button_create }}</button>
+				</div>
+			</form>
+		</div>
+	</div>
+</div>
+
+<script>
+	jQuery(function($) {
+		{{ scripts }}
+	});
+</script>
+{{ footer }}
